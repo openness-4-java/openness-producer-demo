@@ -18,7 +18,7 @@ public class DummyDataGenerator {
             generateDummyEventData(tisDataManager);
     }
 
-    public static void generateDummyEventData(TisDataManager tisDataManager){
+    public static EventDescriptor generateDummyEventData(TisDataManager tisDataManager){
 
         try{
 
@@ -39,8 +39,11 @@ public class DummyDataGenerator {
 
             tisDataManager.createNewEvent(eventDescriptor);
 
+            return eventDescriptor;
+
         }catch (Exception e){
             e.printStackTrace();
+            return null;
         }
     }
 

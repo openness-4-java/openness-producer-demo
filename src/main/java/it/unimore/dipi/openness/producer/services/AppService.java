@@ -5,6 +5,10 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
+import it.unimore.dipi.iot.openness.config.AuthorizedApplicationConfiguration;
+import it.unimore.dipi.iot.openness.connector.EdgeApplicationAuthenticator;
+import it.unimore.dipi.iot.openness.connector.EdgeApplicationConnector;
+import it.unimore.dipi.iot.openness.dto.service.*;
 import it.unimore.dipi.openness.producer.resources.EventResource;
 import it.unimore.dipi.openness.producer.utils.DummyDataGenerator;
 import it.unimore.dipi.openness.producer.utils.EventGenerationTask;
@@ -14,8 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
-import java.util.EnumSet;
-import java.util.Timer;
+import java.util.*;
 
 public class AppService extends Application<AppConfig> {
 
@@ -47,6 +50,50 @@ public class AppService extends Application<AppConfig> {
 
         // Add URL mapping
         cors.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/*");
+
+        String OPENNESS_CONTROLLER_BASE_AUTH_URL = "http://eaa.openness:7080/";
+        String OPENNESS_CONTROLLER_BASE_APP_URL = "https://eaa.openness:7443/";
+        String OPENNESS_CONTROLLER_BASE_APP_WS_URL = "wss://eaa.openness:7443/";
+        EdgeApplicationAuthenticator eaa = new EdgeApplicationAuthenticator(OPENNESS_CONTROLLER_BASE_AUTH_URL);
+        String applicationId = "opennessProducerDemo";
+        String nameSpace = "producerdemo";
+        String organizationName =  "DIPIUniMore";
+
+        AuthorizedApplicationConfiguration authorizedApplicationConfiguration;
+        EdgeApplicationAuthenticator edgeApplicationAuthenticator = new EdgeApplicationAuthenticator(OPENNESS_CONTROLLER_BASE_AUTH_URL);
+        Optional<AuthorizedApplicationConfiguration> storedConfiguration = edgeApplicationAuthenticator.loadExistingAuthorizedApplicationConfiguration(applicationId, organizationName);
+        if(storedConfiguration.isPresent()) {
+            logger.info("AuthorizedApplicationConfiguration Loaded Correctly !");
+            authorizedApplicationConfiguration = storedConfiguration.get();
+        } else {
+            logger.info("AuthorizedApplicationConfiguration Not Available ! Authenticating the app ...");
+            authorizedApplicationConfiguration = edgeApplicationAuthenticator.authenticateApplication(nameSpace, applicationId, organizationName);
+        }
+
+        EdgeApplicationConnector edgeApplicationConnector = new EdgeApplicationConnector(OPENNESS_CONTROLLER_BASE_APP_URL, authorizedApplicationConfiguration, OPENNESS_CONTROLLER_BASE_APP_WS_URL);
+        final List<EdgeApplicationServiceNotificationDescriptor> notifications = new ArrayList<>();
+        final EdgeApplicationServiceNotificationDescriptor notificationDescriptor1 = new EdgeApplicationServiceNotificationDescriptor(
+                "producer demo notification 1",
+                "0.0.1",
+                "producer demo description 1"
+        );
+        notifications.add(notificationDescriptor1);
+        final EdgeApplicationServiceDescriptor service = new EdgeApplicationServiceDescriptor(
+                new EdgeApplicationServiceUrn(applicationId, nameSpace),  // MUST BE AS DURING AUTHENTICATION
+                "producer demo service",
+                String.format("%s/%s", nameSpace, applicationId),  // MUST BE AS DURING AUTHENTICATION
+                "test",
+                notifications,
+                new ServiceInfo("producer demo")
+        );
+        logger.info("Posting service: {}", service);
+        edgeApplicationConnector.postService(service);
+
+        logger.info("Getting services [#1]...");
+        EdgeApplicationServiceList availableServiceList = edgeApplicationConnector.getAvailableServices();
+        for(EdgeApplicationServiceDescriptor serviceDescriptor : availableServiceList.getServiceList()){
+            logger.info("Service Info: {}", serviceDescriptor);
+        }
 
     }
 

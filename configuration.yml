@@ -11,6 +11,8 @@ server:
 swagger:
   resourcePackage: it.unimore.dipi.openness.producer.resources
 
+basePath: http://10.16.0.32:80
+
 #logging:
   # The default level of all loggers. Can be OFF, ERROR, WARN, INFO, DEBUG, TRACE, or ALL.
 #  level: INFO

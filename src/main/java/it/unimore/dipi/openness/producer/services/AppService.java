@@ -26,12 +26,15 @@ public class AppService extends Application<AppConfig> {
     final protected Logger logger = LoggerFactory.getLogger(AppService.class);
 
     private Timer eventTimer;
+
     private final String OPENNESS_CONTROLLER_BASE_AUTH_URL = "http://eaa.openness:7080/";
     private final String OPENNESS_CONTROLLER_BASE_APP_URL = "https://eaa.openness:7443/";
     private final String OPENNESS_CONTROLLER_BASE_APP_WS_URL = "wss://eaa.openness:7443/";
     private final String APPLICATION_ID = "opennessProducerDemoTraffic";
     private final String NAME_SPACE = "producerdemo";
     private final String ORG_NAME = "DIPIUniMore";
+    public static final String NOTIFICATION_NAME = "producer demo notification traffic";
+    public static final String NOTIFICATION_VERSION = "0.0.1";
 
     public static void main(String[] args) throws Exception{
 
@@ -42,7 +45,6 @@ public class AppService extends Application<AppConfig> {
 
         //Create Demo Locations, Device and Users
         DummyDataGenerator.generateMultipleDummyEventData(appConfig.getTisDataManager(),10);
-        startEventGeneratorPeriodicTask(appConfig);
 
         //Add our defined resources
         environment.jersey().register(new EventResource(appConfig));
@@ -63,21 +65,23 @@ public class AppService extends Application<AppConfig> {
         EdgeApplicationConnector edgeApplicationConnector = new EdgeApplicationConnector(OPENNESS_CONTROLLER_BASE_APP_URL, authorizedApplicationConfiguration, OPENNESS_CONTROLLER_BASE_APP_WS_URL);
         final List<EdgeApplicationServiceNotificationDescriptor> notifications = new ArrayList<>();
         final EdgeApplicationServiceNotificationDescriptor notificationDescriptor1 = new EdgeApplicationServiceNotificationDescriptor(
-                "producer demo notification traffic",
-                "0.0.1",
+                NOTIFICATION_NAME,
+                NOTIFICATION_VERSION,
                 "producer demo description traffic"
         );
         notifications.add(notificationDescriptor1);
         final EdgeApplicationServiceDescriptor service = new EdgeApplicationServiceDescriptor(
                 new EdgeApplicationServiceUrn(APPLICATION_ID, NAME_SPACE),  // MUST BE AS DURING AUTHENTICATION
                 "producer demo traffic service",
-                String.format("%s/%s", NAME_SPACE, APPLICATION_ID),  // MUST BE AS DURING AUTHENTICATION
+                String.format("%s/%s/%s", appConfig.basePath, NAME_SPACE, APPLICATION_ID),  // TODO: MUST BE AS DURING AUTHENTICATION (sure??)
                 "ready",
                 notifications,
                 new ServiceInfo("producer demo traffic service")
         );
         logger.info("Posting service: {}", service);
         edgeApplicationConnector.postService(service);
+
+        startEventGeneratorPeriodicTask(appConfig, edgeApplicationConnector, NOTIFICATION_NAME, NOTIFICATION_VERSION);
 
         logger.info("Getting services...");
         EdgeApplicationServiceList availableServiceList = edgeApplicationConnector.getAvailableServices();
@@ -111,10 +115,10 @@ public class AppService extends Application<AppConfig> {
         });
     }
 
-    private void startEventGeneratorPeriodicTask(AppConfig appConfig){
+    private void startEventGeneratorPeriodicTask(AppConfig appConfig, final EdgeApplicationConnector edgeApplicationConnector, final String notificationName, final String notificationVersion){
         try{
             this.eventTimer = new Timer();
-            this.eventTimer.schedule(new EventGenerationTask(appConfig), 10000, 10000);
+            this.eventTimer.schedule(new EventGenerationTask(appConfig, edgeApplicationConnector, notificationName, notificationVersion), 10000, 10000);
         }catch (Exception e){
             e.printStackTrace();
         }

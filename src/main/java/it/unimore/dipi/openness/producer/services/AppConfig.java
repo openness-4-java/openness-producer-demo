@@ -11,6 +11,9 @@ public class AppConfig extends Configuration {
     @JsonProperty("swagger")
     public SwaggerBundleConfiguration swaggerBundleConfiguration;
 
+    @JsonProperty("basePath")
+    public String basePath;
+
     private TisDataManager tisDataManager = null;
 
     public TisDataManager getTisDataManager(){

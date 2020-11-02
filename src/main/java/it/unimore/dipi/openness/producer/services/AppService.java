@@ -76,7 +76,7 @@ public class AppService extends Application<AppConfig> {
                 String.format("%s/%s/%s", appConfig.basePath, NAME_SPACE, APPLICATION_ID),  // TODO: MUST BE AS DURING AUTHENTICATION (sure??)
                 "ready",
                 notifications,
-                new ServiceInfo("producer demo traffic service")
+                "producer demo traffic service"
         );
         logger.info("Posting service: {}", service);
         edgeApplicationConnector.postService(service);

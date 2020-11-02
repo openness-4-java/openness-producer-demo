@@ -2,7 +2,6 @@ package it.unimore.dipi.openness.producer.utils;
 
 import it.unimore.dipi.iot.openness.connector.EdgeApplicationConnector;
 import it.unimore.dipi.iot.openness.dto.service.NotificationFromProducer;
-import it.unimore.dipi.iot.openness.dto.service.NotificationPayload;
 import it.unimore.dipi.openness.producer.model.EventDescriptor;
 import it.unimore.dipi.openness.producer.services.AppConfig;
 import it.unimore.dipi.openness.producer.services.AppService;
@@ -39,9 +38,8 @@ public class EventGenerationTask extends TimerTask {
             final NotificationFromProducer notification = new NotificationFromProducer(
                     this.notificationName,
                     this.notificationVersion,
-                    new NotificationPayload(
-                            eventDescriptor
-                    ));
+                    eventDescriptor
+                    );
             eac.postNotification(notification);
             logger.info("Posting event to notification service...\n\tnotification -> {}", notification);
 

@@ -73,7 +73,7 @@ public class AppService extends Application<AppConfig> {
         final EdgeApplicationServiceDescriptor service = new EdgeApplicationServiceDescriptor(
                 new EdgeApplicationServiceUrn(APPLICATION_ID, NAME_SPACE),  // MUST BE AS DURING AUTHENTICATION
                 "producer demo traffic service",
-                String.format("%s/%s/%s", appConfig.basePath, NAME_SPACE, APPLICATION_ID),  // TODO: MUST BE AS DURING AUTHENTICATION (sure??)
+                String.format("%s", appConfig.endpoint),  // TODO: what about NAME_SPACE, APPLICATION_ID?
                 "ready",
                 notifications,
                 "producer demo traffic service"

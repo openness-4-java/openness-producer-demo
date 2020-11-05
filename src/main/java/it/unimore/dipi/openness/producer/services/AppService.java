@@ -27,9 +27,6 @@ public class AppService extends Application<AppConfig> {
 
     private Timer eventTimer;
 
-    private final String OPENNESS_CONTROLLER_BASE_AUTH_URL = "http://eaa.openness:7080/";
-    private final String OPENNESS_CONTROLLER_BASE_APP_URL = "https://eaa.openness:7443/";
-    private final String OPENNESS_CONTROLLER_BASE_APP_WS_URL = "wss://eaa.openness:7443/";
     private final String APPLICATION_ID = "opennessProducerDemoTraffic";
     private final String NAME_SPACE = "producerdemo";
     private final String ORG_NAME = "DIPIUniMore";
@@ -60,9 +57,9 @@ public class AppService extends Application<AppConfig> {
         // Add URL mapping
         cors.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/*");
 
-        final AuthorizedApplicationConfiguration authorizedApplicationConfiguration = handleAuth();
+        final AuthorizedApplicationConfiguration authorizedApplicationConfiguration = handleAuth(appConfig);
 
-        EdgeApplicationConnector edgeApplicationConnector = new EdgeApplicationConnector(OPENNESS_CONTROLLER_BASE_APP_URL, authorizedApplicationConfiguration, OPENNESS_CONTROLLER_BASE_APP_WS_URL);
+        EdgeApplicationConnector edgeApplicationConnector = new EdgeApplicationConnector(appConfig.api, authorizedApplicationConfiguration, appConfig.ws);
         final List<EdgeApplicationServiceNotificationDescriptor> notifications = new ArrayList<>();
         final EdgeApplicationServiceNotificationDescriptor notificationDescriptor1 = new EdgeApplicationServiceNotificationDescriptor(
                 NOTIFICATION_NAME,
@@ -91,9 +88,9 @@ public class AppService extends Application<AppConfig> {
 
     }
 
-    private AuthorizedApplicationConfiguration handleAuth() throws EdgeApplicationAuthenticatorException {
+    private AuthorizedApplicationConfiguration handleAuth(final AppConfig appConfig) throws EdgeApplicationAuthenticatorException {
         final AuthorizedApplicationConfiguration authorizedApplicationConfiguration;
-        final EdgeApplicationAuthenticator edgeApplicationAuthenticator = new EdgeApplicationAuthenticator(OPENNESS_CONTROLLER_BASE_AUTH_URL);
+        final EdgeApplicationAuthenticator edgeApplicationAuthenticator = new EdgeApplicationAuthenticator(appConfig.auth);
         final Optional<AuthorizedApplicationConfiguration> storedConfiguration = edgeApplicationAuthenticator.loadExistingAuthorizedApplicationConfiguration(APPLICATION_ID, ORG_NAME);
         if(storedConfiguration.isPresent()) {
             logger.info("AuthorizedApplicationConfiguration Loaded Correctly !");

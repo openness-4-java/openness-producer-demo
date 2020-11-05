@@ -11,6 +11,9 @@ server:
 swagger:
   resourcePackage: it.unimore.dipi.openness.producer.resources
 
+auth: http://eaa.openness:7080/
+api: https://eaa.openness:7443/
+ws: wss://eaa.openness:7443/
 endpoint: http://eaa.openness:7070/api/tis/event/
 
 #logging:

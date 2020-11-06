@@ -59,7 +59,7 @@ public class AppService extends Application<AppConfig> {
 
         final AuthorizedApplicationConfiguration authorizedApplicationConfiguration = handleAuth(appConfig);
 
-        EdgeApplicationConnector edgeApplicationConnector = new EdgeApplicationConnector(appConfig.api, authorizedApplicationConfiguration, appConfig.ws);
+        EdgeApplicationConnector edgeApplicationConnector = new EdgeApplicationConnector(appConfig.myApi, authorizedApplicationConfiguration, appConfig.myWs);
         final List<EdgeApplicationServiceNotificationDescriptor> notifications = new ArrayList<>();
         final EdgeApplicationServiceNotificationDescriptor notificationDescriptor1 = new EdgeApplicationServiceNotificationDescriptor(
                 NOTIFICATION_NAME,
@@ -90,7 +90,7 @@ public class AppService extends Application<AppConfig> {
 
     private AuthorizedApplicationConfiguration handleAuth(final AppConfig appConfig) throws EdgeApplicationAuthenticatorException {
         final AuthorizedApplicationConfiguration authorizedApplicationConfiguration;
-        final EdgeApplicationAuthenticator edgeApplicationAuthenticator = new EdgeApplicationAuthenticator(appConfig.auth);
+        final EdgeApplicationAuthenticator edgeApplicationAuthenticator = new EdgeApplicationAuthenticator(appConfig.myAuth);
         final Optional<AuthorizedApplicationConfiguration> storedConfiguration = edgeApplicationAuthenticator.loadExistingAuthorizedApplicationConfiguration(APPLICATION_ID, ORG_NAME);
         if(storedConfiguration.isPresent()) {
             logger.info("AuthorizedApplicationConfiguration Loaded Correctly !");

@@ -11,12 +11,12 @@ public class AppConfig extends Configuration {
     @JsonProperty("swagger")
     public SwaggerBundleConfiguration swaggerBundleConfiguration;
 
-    @JsonProperty("auth")
-    public String auth;
-    @JsonProperty("api")
-    public String api;
-    @JsonProperty("ws")
-    public String ws;
+    @JsonProperty("myAuth")
+    public String myAuth;
+    @JsonProperty("myApi")
+    public String myApi;
+    @JsonProperty("myWs")
+    public String myWs;
     @JsonProperty("endpoint")
     public String endpoint;
 
